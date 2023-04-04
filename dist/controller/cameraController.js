@@ -11,7 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCamera = exports.updateCamera = exports.getSingleCamera = exports.addCamera = exports.getAllCameras = void 0;
 const connection_1 = require("../config/connection");
-// get all camera
+//@desc Get all cameras
+//@route GET /api/camera
 const getAllCameras = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let sql = "SELECT * FROM CAMERAS";
     connection_1.db.query(sql, (err, result) => {
@@ -22,7 +23,8 @@ const getAllCameras = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     });
 });
 exports.getAllCameras = getAllCameras;
-//create camera
+//@desc create cameras
+//@route POST /api/camera
 const addCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let camera = req.body;
     let sql = "INSERT INTO cameras SET ?";
@@ -34,7 +36,8 @@ const addCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.addCamera = addCamera;
-//get single camera
+//@desc Get single camera
+//@route GET /api/camera/:id
 const getSingleCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { id } = req.params;
     let sql = "SELECT * FROM cameras WHERE id = ?";
@@ -46,7 +49,8 @@ const getSingleCamera = (req, res) => __awaiter(void 0, void 0, void 0, function
     });
 });
 exports.getSingleCamera = getSingleCamera;
-//update camera
+//@desc Update cameras
+//@route PUT /api/camera/:id
 const updateCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { id } = req.params;
     let camera = req.body;
@@ -64,20 +68,29 @@ const updateCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     });
 });
 exports.updateCamera = updateCamera;
+//@desc Delete cameras
+//@route delete /api/camera/:id
 const deleteCamera = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { id } = req.params;
     let sql = `DELETE FROM cameras WHERE id = ?`;
     connection_1.db.query(sql, id, (err, result) => {
         if (err) {
-            console.log('Error deleting camera:', err);
-            res.status(500).send('Error deleting camera');
+            console.log("Error deleting camera:", err);
+            res.status(500).send("Error deleting camera");
             return;
         }
         if (result.affectedRows === 0) {
-            res.status(404).send('Camera not found');
+            res.status(404).send("Camera not found");
             return;
         }
-        res.status(200).json('Camera deleted successfully');
+        const updateQuery = `UPDATE CameraNetworks SET cameras = JSON_REMOVE(cameras, JSON_UNQUOTE(JSON_SEARCH(cameras, 'one', ?))) WHERE JSON_SEARCH(cameras, 'one', ?) IS NOT NULL`;
+        connection_1.db.query(updateQuery, [id, id], (err, result) => {
+            if (err) {
+                res.status(500).send("Error deleting camera");
+                return;
+            }
+            res.send("Camera deleted successfully");
+        });
     });
 });
 exports.deleteCamera = deleteCamera;

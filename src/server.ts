@@ -6,6 +6,8 @@ import cameraRouter from "./routes/cameraRouter"
 import cameraNetworkRouter from "./routes/cameraNetworkRouter"
 
 const app: Application = express();
+
+//connect DB
 db.connect(function (err) {
   if (err) {
     throw err
@@ -15,6 +17,7 @@ db.connect(function (err) {
 
 app.use(express.json())
 
+// Routes
 app.use("/api/camera",cameraRouter)
 app.use("/api/cameranetworks",cameraNetworkRouter)
 

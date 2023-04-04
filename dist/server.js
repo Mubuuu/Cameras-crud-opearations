@@ -10,6 +10,7 @@ const connection_1 = require("./config/connection");
 const cameraRouter_1 = __importDefault(require("./routes/cameraRouter"));
 const cameraNetworkRouter_1 = __importDefault(require("./routes/cameraNetworkRouter"));
 const app = (0, express_1.default)();
+//connect DB
 connection_1.db.connect(function (err) {
     if (err) {
         throw err;
@@ -17,6 +18,7 @@ connection_1.db.connect(function (err) {
     console.log("Connected to the MySQL server.");
 });
 app.use(express_1.default.json());
+// Routes
 app.use("/api/camera", cameraRouter_1.default);
 app.use("/api/cameranetworks", cameraNetworkRouter_1.default);
 const port = 5000;

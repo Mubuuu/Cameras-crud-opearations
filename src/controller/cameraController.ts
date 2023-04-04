@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { db } from "../config/connection";
 
-// get all camera
+//@desc Get all cameras
+//@route GET /api/camera
 export const getAllCameras = async (req: Request, res: Response) => {
   let sql = "SELECT * FROM CAMERAS";
   db.query(sql, (err: any, result: any) => {
@@ -11,7 +12,9 @@ export const getAllCameras = async (req: Request, res: Response) => {
     res.status(200).json(result);
   });
 };
-//create camera
+
+//@desc create cameras
+//@route POST /api/camera
 export const addCamera = async (req: Request, res: Response) => {
   let camera = req.body;
   let sql = "INSERT INTO cameras SET ?";
@@ -22,7 +25,9 @@ export const addCamera = async (req: Request, res: Response) => {
     res.status(201).json(camera);
   });
 };
-//get single camera
+
+//@desc Get single camera
+//@route GET /api/camera/:id
 export const getSingleCamera = async (req: Request, res: Response) => {
   let { id } = req.params;
   let sql = "SELECT * FROM cameras WHERE id = ?";
@@ -33,7 +38,9 @@ export const getSingleCamera = async (req: Request, res: Response) => {
     res.status(201).json(result[0]);
   });
 };
-//update camera
+
+//@desc Update cameras
+//@route PUT /api/camera/:id
 export const updateCamera = async (req: Request, res: Response) => {
   let { id } = req.params;
   let camera = req.body;
@@ -48,19 +55,29 @@ export const updateCamera = async (req: Request, res: Response) => {
     }
   });
 };
+
+//@desc Delete cameras
+//@route delete /api/camera/:id
 export const deleteCamera = async (req: Request, res: Response) => {
   let { id } = req.params;
   let sql = `DELETE FROM cameras WHERE id = ?`;
   db.query(sql, id, (err, result) => {
     if (err) {
-        console.log('Error deleting camera:', err);
-        res.status(500).send('Error deleting camera');
+      console.log("Error deleting camera:", err);
+      res.status(500).send("Error deleting camera");
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).send("Camera not found");
+      return;
+    }
+    const updateQuery = `UPDATE CameraNetworks SET cameras = JSON_REMOVE(cameras, JSON_UNQUOTE(JSON_SEARCH(cameras, 'one', ?))) WHERE JSON_SEARCH(cameras, 'one', ?) IS NOT NULL`;
+    db.query(updateQuery, [id, id], (err, result) => {
+      if (err) {
+        res.status(500).send("Error deleting camera");
         return;
       }
-      if (result.affectedRows === 0) {
-        res.status(404).send('Camera not found');
-        return;
-      }
-      res.status(200).json('Camera deleted successfully');
+      res.send("Camera deleted successfully");
+    });
   });
 };
